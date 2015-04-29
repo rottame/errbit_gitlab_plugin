@@ -35,6 +35,20 @@ module ErrbitGitlabPlugin
     def self.fields
       FIELDS
     end
+    
+    def self.icons
+      @icons ||= {
+        create: [
+          'image/png', ErrbitGithubPlugin.read_static_file('github_create.png')
+        ],
+        goto: [
+          'image/png', ErrbitGithubPlugin.read_static_file('github_goto.png'),
+        ],
+        inactive: [
+          'image/png', ErrbitGithubPlugin.read_static_file('github_inactive.png'),
+        ]
+      }
+    end
 
     def self.body_template
       @body_template ||= ERB.new(File.read(
