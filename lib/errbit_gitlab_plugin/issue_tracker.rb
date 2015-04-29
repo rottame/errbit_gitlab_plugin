@@ -67,18 +67,18 @@ module ErrbitGitlabPlugin
     end
 
     def url
-      sprintf('%s/%s/issues', params['account'], params['alt_project_id'])
+      sprintf('%s/%s/issues', options['account'], options['alt_project_id'])
     end
 
     def configured?
-      params['project_id'].present? && params['api_token'].present?
+      options['project_id'].present? && options['api_token'].present?
     end
 
     def comments_allowed?; false; end
 
     def errors
       errors = []
-      if self.class.fields.detect {|f| params[f[0]].blank? }
+      if self.class.fields.detect {|f| options[f[0]].blank? }
         errors << [:base, 'You must specify your Gitlab URL, API token, Project ID and Project Name']
       end
       errors
@@ -86,8 +86,8 @@ module ErrbitGitlabPlugin
 
     def create_issue(problem, reported_by = nil)
       Gitlab.configure do |config|
-        config.endpoint = sprintf('%s/api/v3', params['account'])
-        config.private_token = params['api_token']
+        config.endpoint = sprintf('%s/api/v3', options['account'])
+        config.private_token = options['api_token']
         config.user_agent = 'Errbit User Agent'
       end
 
@@ -95,12 +95,12 @@ module ErrbitGitlabPlugin
       description_summary = self.class.summary_template.result(binding)
       description_body = self.class.body_template.result(binding)
 
-      ticket = Gitlab.create_issue(params['project_id'], title, {
+      ticket = Gitlab.create_issue(options['project_id'], title, {
         :description => description_summary,
         :labels => "errbit"
       })
 
-      Gitlab.create_issue_note(params['project_id'], ticket.id, description_body)
+      Gitlab.create_issue_note(options['project_id'], ticket.id, description_body)
 
       problem.update_attributes(
         :issue_link => sprintf("%s/%s", url, ticket.id),
